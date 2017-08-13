@@ -176,6 +176,10 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        /*
+         * Acme Service Providers...
+         */
+        Product\ProductServiceProvider::class,
     ],
 
     /*
