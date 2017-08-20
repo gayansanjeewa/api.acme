@@ -20,6 +20,7 @@ class CreateProductsTable extends Migration
             $table->string('name');
             $table->double('price');
             $table->string('status')->default(0);
+            $table->timestamp('published_at');
             $table->timestamps();
         });
     }
