@@ -7,9 +7,15 @@ use Product\Repositories\Contracts\ProductInterface;
 
 class ProductRepository implements ProductInterface
 {
-    public function all()
+    public function all($params)
     {
-        $products = Product::all();
+        $productBuilder = new Product();
+
+        if (!empty($params['display']) && $params['display'] === 'published') {
+            $productBuilder = $productBuilder->published();
+        }
+
+        $products = $productBuilder->get();
 
         return response()->json(compact('products'));
     }
