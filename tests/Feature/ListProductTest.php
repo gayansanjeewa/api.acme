@@ -47,4 +47,34 @@ class ListProductTest extends TestCase
         // Then
         $response->assertJson($json);
     }
+
+    /**
+     * @test
+     */
+    public function it_lists_already_published_products()
+    {
+        // Given
+        $productOne = factory(Product::class)->create();
+        $productTwo = factory(Product::class)->create(['published_at' => Carbon::now()->addDays(7)]);
+        $json = [
+            'products' => [
+                [
+                    'id' => $productOne->id,
+                    'name' => $productOne->name,
+                    'price' => $productOne->price,
+                    'status' => $productOne->status,
+                    'user_id' => $productOne->user_id,
+                    'published_at' => $productOne->published_at,
+                ],
+            ]
+        ];
+
+        // When
+        $response = $this->json('GET', 'api/product?display=published');
+
+        // Then
+        $response
+            ->assertJson($json)
+            ->assertDontSeeText($productTwo->name);
+    }
 }

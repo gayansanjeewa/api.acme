@@ -24,7 +24,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        return $this->product->all();
+        return $this->product->all(request()->all());
     }
 
     /**
