@@ -14,4 +14,9 @@ class Product extends Model
     {
         return $query->where('published_at', '<=', Carbon::now());
     }
+
+    public function scopeQ($query, $q)
+    {
+        return $query->where('name', 'like', '%' . $q . '%');
+    }
 }

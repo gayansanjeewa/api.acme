@@ -11,10 +11,14 @@ class ProductRepository implements ProductInterface
     {
         $productBuilder = new Product();
 
+        if (!empty($params['q'])) {
+            $productBuilder = $productBuilder->q($params['q']);
+        }
+
         if (!empty($params['display']) && $params['display'] === 'published') {
             $productBuilder = $productBuilder->published();
         }
-
+        
         $products = $productBuilder->get();
 
         return response()->json(compact('products'));

@@ -77,4 +77,25 @@ class ListProductTest extends TestCase
             ->assertJson($json)
             ->assertDontSeeText($productTwo->name);
     }
+
+    /**
+     * @test
+     */
+    public function it_search_for_products_by_a_given_characters()
+    {
+        // Given
+        $chair1 = factory(Product::class)->create(['name' => 'red chair']);
+        $chair2 = factory(Product::class)->create(['name' => 'blue chair']);
+        $table1 = factory(Product::class)->create(['name' => 'red table']);
+        $table2 = factory(Product::class)->create(['name' => 'blue table']);
+
+        // When
+        $response = $this->json('GET', 'api/product?q=chair');
+
+        // Then
+        $response
+            ->assertStatus(200)
+            ->assertSeeText('chair')
+            ->assertDontSeeText('table');
+    }
 }
