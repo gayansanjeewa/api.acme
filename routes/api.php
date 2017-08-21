@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -13,10 +11,20 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
+//Route::middleware('auth:api')->get('/user', function (Request $request) {
+//    return $request->user();
+//});
 
-Route::prefix('product')->middleware('api')->group(function () {
+Route::middleware('jwt.auth')->group(function () {
+    Route::prefix('product')->group(function () {
+        //
+    });
+});
+Route::prefix('product')->group(function () {
     Route::get('/', 'ProductController@index');
 });
+
+
+Route::post('/register', 'TokenAuthController@register');
+Route::post('/authenticate', 'TokenAuthController@authenticate');
+Route::get('/authenticate/user', 'TokenAuthController@getAuthenticatedUser');
