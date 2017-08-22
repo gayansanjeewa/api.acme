@@ -6,9 +6,14 @@ use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Exceptions\JWTException;
-use Tymon\JWTAuth\Exceptions\TokenExpiredException;
-use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException as JWTTokenExpiredException;
+use Tymon\JWTAuth\Exceptions\TokenInvalidException as JWTTokenInvalidException;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Utilities\Exceptions\TokenExpiredException;
+use Utilities\Exceptions\TokenInvalidException;
+use Utilities\Exceptions\TokenNotProvidedException;
+use Utilities\Exceptions\UserNotFoundException;
+use Utilities\Exceptions\ValidationException;
 
 class TokenAuthController extends Controller
 {
@@ -20,11 +25,13 @@ class TokenAuthController extends Controller
         try {
             // attempt to verify the credentials and create a token for the user
             if (!$token = JWTAuth::attempt($credentials)) {
-                return response()->json(['error' => 'invalid_credentials'], 401);
+                throw new ValidationException('Invalid Credentials', 422);
+//                return response()->json(['error' => 'invalid_credentials'], 401);
             }
         } catch (JWTException $e) {
             // something went wrong whilst attempting to encode the token
-            return response()->json(['error' => 'could_not_create_token'], 500);
+//            return response()->json(['error' => 'could_not_create_token'], 500);
+            throw new TokenNotProvidedException('Could Not Create Token', 500);
         }
 
         // all good so return the token
@@ -35,14 +42,14 @@ class TokenAuthController extends Controller
     {
         try {
             if (!$user = JWTAuth::parseToken()->authenticate()) {
-                return response()->json(['user_not_found'], 404);
+                throw new UserNotFoundException('User Not Found', 404);
             }
-        } catch (TokenExpiredException $e) {
-            return response()->json(['token_expired'], $e->getStatusCode());
-        } catch (TokenInvalidException $e) {
-            return response()->json(['token_invalid'], $e->getStatusCode());
+        } catch (JWTTokenExpiredException $e) {
+            throw new TokenExpiredException('Token Expired', 401);
+        } catch (JWTTokenInvalidException $e) {
+            throw new TokenInvalidException('Token Invalid', 400);
         } catch (JWTException $e) {
-            return response()->json(['token_absent'], $e->getStatusCode());
+            throw new TokenNotProvidedException('Token Absent', 400);
         }
 
         // the token is valid and we have found the user via the sub claim

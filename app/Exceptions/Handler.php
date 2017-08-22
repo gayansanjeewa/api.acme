@@ -3,9 +3,12 @@
 namespace App\Exceptions;
 
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use Utilities\Exceptions\ValidationException;
 
 class Handler extends ExceptionHandler
 {
@@ -50,14 +53,54 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
-        if ($exception instanceof TokenExpiredException) {
-            return response()->json(['token_expired'], $exception->getStatusCode());
-        } else {
-            if ($exception instanceof TokenInvalidException) {
-                return response()->json(['token_invalid'], $exception->getStatusCode());
+        if ($request->header("env") == "dev") {
+            if ($exception instanceof ModelNotFoundException) {
+                $exception = new NotFoundHttpException($exception->getMessage(), $exception);
             }
+            return parent::render($request, $exception);
         }
 
-        return parent::render($request, $exception);
+        \Log::error($exception->getMessage());
+        $status = 400;
+
+        if ($this->isHttpException($exception)) {
+            $status = $exception->getStatusCode();
+        }
+        $this->response['exception'] = class_basename(get_class($exception));
+        $this->response['messages'] = $exception->getMessage();
+        $this->response['code'] = $exception->getCode();
+
+//        $this->handleTokenExceptions($exception);
+        $this->handleValidationException($exception);
+
+//        return error($this->response, $status)->send();
+        return response()->json($this->response, $status);
+//        return parent::render($request, $exception);
+    }
+
+    /**
+     * @param Exception $e
+     */
+    private function handleValidationException(Exception $e)
+    {
+        if ($e instanceof ValidationException) {
+            $this->response['messages'] = $e->getErrors();
+        }
+    }
+
+    /**
+     * @param Exception $exception
+     */
+    private function handleTokenExceptions(Exception $exception)
+    {
+        if ($exception instanceof TokenExpiredException) {
+            $this->response['messages'] = 'token_expired....';
+//            return response()->json(['token_expired'], $exception->getStatusCode());
+        } else {
+            if ($exception instanceof TokenInvalidException) {
+                $this->response['messages'] = 'token_invalid';
+//                return response()->json(['token_invalid'], $exception->getStatusCode());
+            }
+        }
     }
 }
