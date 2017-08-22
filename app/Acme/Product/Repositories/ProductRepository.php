@@ -2,6 +2,7 @@
 
 namespace Product\Repositories;
 
+use App\Events\ProductHasPublished;
 use App\Product;
 use Carbon\Carbon;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -43,11 +44,13 @@ class ProductRepository implements ProductInterface
         if ($validator->fails()) {
             throw new UnprocessableProductException($validator->errors()->toArray());
         }
+
         $data['user_id'] = auth()->user()->id;
         $data['published_at'] = $this->publishedAt($data); // TODO: set crone
         $data['status'] = $this->status($data);
-        
+
         $product = Product::create($data);
+        event(new ProductHasPublished($product));
         return response()->json(compact('product'));
     }
 
@@ -58,9 +61,26 @@ class ProductRepository implements ProductInterface
 
     private function status($data)
     {
-        if ($data['published_at'] <= Carbon::now() ) {
+        if ($data['published_at'] <= Carbon::now()) {
             return ProductStatus::PUBLISH;
         }
         return ProductStatus::PENDING;
+    }
+
+    public function publishScheduledProducts()
+    {
+        try {
+            $builder = Product::published()->where('status', ProductStatus::PENDING);
+            $products = $builder->get();
+
+            if (!$products->isEmpty()) {
+                $builder->update(['status'=>ProductStatus::PUBLISH]);
+                $products->each(function ($product) {
+                    event(new ProductHasPublished($product));
+                });
+            }
+        } catch (\Exception $e) {
+            \Log::info($e->getMessage());
+        }
     }
 }
