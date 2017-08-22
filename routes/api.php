@@ -17,7 +17,7 @@
 
 Route::middleware('jwt.auth')->group(function () {
     Route::prefix('product')->group(function () {
-        //
+        Route::post('/', 'ProductController@store');
     });
 });
 Route::prefix('product')->group(function () {
