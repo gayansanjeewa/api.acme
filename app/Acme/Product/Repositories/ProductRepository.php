@@ -44,10 +44,9 @@ class ProductRepository implements ProductInterface
             throw new UnprocessableProductException($validator->errors()->toArray());
         }
         $data['user_id'] = auth()->user()->id;
-        $data['published_at'] = $this->publishedAt($data);
+        $data['published_at'] = $this->publishedAt($data); // TODO: set crone
         $data['status'] = $this->status($data);
-
-
+        
         $product = Product::create($data);
         return response()->json(compact('product'));
     }
