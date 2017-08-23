@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use App\Events\ProductHasPublished;
 use App\Notifications\ProductCreated;
+use App\User;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Notification;
@@ -30,7 +31,8 @@ class NotifyProductPublish implements ShouldQueue
      */
     public function handle(ProductHasPublished $event)
     {
-        \Log::info($event->product->toArray());
-        Notification::send(auth()->user(), new ProductCreated($event->product));
+        $user = User::find($event->product->user_id);
+        \Log::info($user);
+        Notification::send($user, new ProductCreated($event->product));
     }
 }
