@@ -1,4 +1,4 @@
-##Project scope:
+## Project scope:
 
 > **In Acme Corp,
 a user can create many products.
@@ -11,6 +11,7 @@ When the product is created, a confirmation email should be sent to the user.**
 - user can log in to the system
 - user can reset his password
 
+
 - user can create product
 - user can view a list of his products
 - user can view a product
@@ -21,3 +22,4 @@ When the product is created, a confirmation email should be sent to the user.**
 - anyone can see a list of product
 - anyone can view a product
 
+**Attach with [this](https://docs.google.com/presentation/d/1a55MoVr3tlh3BdPH2M5NUMLc5IKQtHYxGEB0gZ__AoU/edit?usp=sharing) presentation**
