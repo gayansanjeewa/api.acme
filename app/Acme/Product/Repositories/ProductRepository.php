@@ -74,7 +74,7 @@ class ProductRepository implements ProductInterface
             $products = $builder->get();
 
             if (!$products->isEmpty()) {
-                $builder->update(['status'=>ProductStatus::PUBLISH]);
+                $builder->update(['status' => ProductStatus::PUBLISH]);
                 $products->each(function ($product) {
                     event(new ProductHasPublished($product));
                 });
